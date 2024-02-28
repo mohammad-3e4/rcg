@@ -3,18 +3,19 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios"; // Removed unused import
 import { useSelector, useDispatch } from "react-redux";
-import {URL} from '../URL'
-
+import { URL } from "../URL";
 
 const SecondaryForm = () => {
   const dispatch = useDispatch();
-  const selectedVal = useSelector((state) => state.selectedValues.selectedValues);
+  const selectedVal = useSelector(
+    (state) => state.selectedValues.selectedValues
+  );
   const selectedClass = selectedVal[0];
   const selectedSection = selectedVal[1];
   const selectedSubject = selectedVal[2];
   const selectedClassNumber = selectedVal[3];
-  
-  const [selected, setSelected] = useState()
+
+  const [selected, setSelected] = useState();
   const [dataone, setDataone] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [message, setMessage] = useState("");
@@ -54,7 +55,7 @@ const SecondaryForm = () => {
   });
 
   const handleStudent = (studentdata) => {
-    setSelected(studentdata)
+    setSelected(studentdata);
     formik.setFieldValue("adm_no", studentdata.adm_no);
     formik.setFieldValue("student_name", studentdata.student_name);
     setFiltered([]);
@@ -64,14 +65,19 @@ const SecondaryForm = () => {
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
-        const response = await axios.post(`${URL}/admin/subject-secondary-info`, values);
-        setMessage(response.data.message);
+        const response = await axios.post(
+          `${URL}/admin/subject-secondary-info`,
+          values
+        );
+        // setMessage(response.data.message);
+        console.log(response.data);
         setTimeout(() => {
           setMessage("");
           resetForm();
         }, 2000);
       } catch (error) {
-        setError(error.response.data.error);
+        // setError(error.response.data.error);
+        console.log(error);
         setTimeout(() => {
           setError("");
           resetForm();
@@ -81,7 +87,7 @@ const SecondaryForm = () => {
     },
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     formik.setFieldValue("class_name", selectedClass);
     formik.setFieldValue("section", selectedSection);
     formik.setFieldValue("subject", selectedSubject);
@@ -89,16 +95,14 @@ const SecondaryForm = () => {
       if (selectedClass && selectedSection) {
         const tableName = `${selectedClass}_${selectedSection.toLowerCase()}_biodata`;
         try {
-          const response = await axios.get(
-            `${URL}/studentdata/${tableName}`
-          );
+          const response = await axios.get(`${URL}/studentdata/${tableName}`);
 
-          setDataone(response.data.results)
+          setDataone(response.data.results);
         } catch (error) {
-          setError('No data found for this class');
-          setTimeout(()=>{
-            setError('')
-          },3000)
+          setError("No data found for this class");
+          setTimeout(() => {
+            setError("");
+          }, 3000);
           console.error("Error fetching biodata:", error);
         }
       }
@@ -112,21 +116,30 @@ const SecondaryForm = () => {
     } else {
       setFiltered([]);
     }
- 
+
     function best_Two(pt1, pt2, pt3) {
       const numbers = [pt1, pt2, pt3];
-    
+
       numbers.sort((x, y) => y - x);
-    
+
       const maxTwoSum = numbers[0] + numbers[1];
       const avgOfMaxTwo = maxTwoSum / 2;
-    
-      return avgOfMaxTwo;}
-    if(formik.values.pen_paper_pt1 && formik.values.pen_paper_pt2 && formik.values.pen_paper_pt3){
-       const maxTwoSum =  best_Two(formik.values.pen_paper_pt1,formik.values.pen_paper_pt2, formik.values.pen_paper_pt3);
-       formik.setFieldValue('best_of_two',maxTwoSum)
+
+      return avgOfMaxTwo;
     }
-  
+    if (
+      formik.values.pen_paper_pt1 &&
+      formik.values.pen_paper_pt2 &&
+      formik.values.pen_paper_pt3
+    ) {
+      const maxTwoSum = best_Two(
+        formik.values.pen_paper_pt1,
+        formik.values.pen_paper_pt2,
+        formik.values.pen_paper_pt3
+      );
+      formik.setFieldValue("best_of_two", maxTwoSum);
+    }
+
     const calculateGrade = (totalMarks) => {
       if (totalMarks >= 91 && totalMarks <= 100) {
         return "A1";
@@ -146,38 +159,44 @@ const SecondaryForm = () => {
         return "E";
       }
     };
-  
 
-    if(formik.values.best_of_two && formik.values.sub_enrich_act && formik.values.portfoilo && formik.values.multiple_assessment){
-      const total =  formik.values.best_of_two + formik.values.sub_enrich_act + formik.values.portfoilo + formik.values.multiple_assessment;
-      formik.setFieldValue('total_marks',total)
+    if (
+      formik.values.best_of_two &&
+      formik.values.sub_enrich_act &&
+      formik.values.portfoilo &&
+      formik.values.multiple_assessment
+    ) {
+      const total =
+        formik.values.best_of_two +
+        formik.values.sub_enrich_act +
+        formik.values.portfoilo +
+        formik.values.multiple_assessment;
+      formik.setFieldValue("total_marks", total);
       const grade = calculateGrade(total);
       formik.setFieldValue("final_grade", grade);
-   }
-    
-  },[formik.values])
+    }
+  }, [formik.values]);
 
-  
   return (
     <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
-        {message ? (
-                <div
-                  className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4"
-                  role="alert"
-                >
-                  <p className="font-bold">Success!</p>
-                  <p>{message}</p>
-                </div>
-              ) : null}
-              {error && (
-                <div
-                  className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4"
-                  role="alert"
-                >
-                  <p className="font-bold">Error!</p>
-                  <p>{error}</p>
-                </div>
-              )}
+      {message ? (
+        <div
+          className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4"
+          role="alert"
+        >
+          <p className="font-bold">Success!</p>
+          <p>{message}</p>
+        </div>
+      ) : null}
+      {error && (
+        <div
+          className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4"
+          role="alert"
+        >
+          <p className="font-bold">Error!</p>
+          <p>{error}</p>
+        </div>
+      )}
       <form className="py-3" onSubmit={formik.handleSubmit}>
         <div className="flex flex-wrap">
           <div className="w-full lg:w-6/12 px-4">
@@ -194,10 +213,11 @@ const SecondaryForm = () => {
                 value={formik.values.adm_no}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.adm_no && formik.errors.adm_no
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.adm_no && formik.errors.adm_no
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
             {filtered.length > 0 && (
@@ -239,10 +259,11 @@ const SecondaryForm = () => {
                 value={formik.values.student_name}
                 onChange={formik.handleChange}
                 disabled
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.student_name && formik.errors.student_name
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.student_name && formik.errors.student_name
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
             {formik.touched.student_name && formik.errors.student_name && (
@@ -269,10 +290,11 @@ const SecondaryForm = () => {
                 value={formik.values.total_marks}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.total_marks && formik.errors.total_marks
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.total_marks && formik.errors.total_marks
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
           </div>
@@ -291,10 +313,11 @@ const SecondaryForm = () => {
                 value={formik.values.final_grade}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.final_grade && formik.errors.final_grade
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.final_grade && formik.errors.final_grade
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
           </div>
@@ -324,11 +347,12 @@ const SecondaryForm = () => {
                     }
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.pen_paper_pt1 &&
-                        formik.errors.pen_paper_pt1
+                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                      formik.touched.pen_paper_pt1 &&
+                      formik.errors.pen_paper_pt1
                         ? "border-red-500"
                         : ""
-                      }`}
+                    }`}
                   />
                 </div>
                 {formik.touched.pen_paper_pt1 &&
@@ -360,11 +384,12 @@ const SecondaryForm = () => {
                     }
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.pen_paper_pt2 &&
-                        formik.errors.pen_paper_pt2
+                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                      formik.touched.pen_paper_pt2 &&
+                      formik.errors.pen_paper_pt2
                         ? "border-red-500"
                         : ""
-                      }`}
+                    }`}
                   />
                 </div>
                 {formik.touched.pen_paper_pt2 &&
@@ -398,11 +423,12 @@ const SecondaryForm = () => {
                     }
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.pen_paper_pt3 &&
-                        formik.errors.pen_paper_pt3
+                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                      formik.touched.pen_paper_pt3 &&
+                      formik.errors.pen_paper_pt3
                         ? "border-red-500"
                         : ""
-                      }`}
+                    }`}
                   />
                 </div>
                 {formik.touched.pen_paper_pt3 &&
@@ -435,10 +461,11 @@ const SecondaryForm = () => {
                     }
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.best_of_two && formik.errors.best_of_two
+                    className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                      formik.touched.best_of_two && formik.errors.best_of_two
                         ? "border-red-500"
                         : ""
-                      }`}
+                    }`}
                   />
                 </div>
                 {formik.touched.best_of_two && formik.errors.best_of_two && (
@@ -470,11 +497,12 @@ const SecondaryForm = () => {
                   }
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.multiple_assessment &&
-                      formik.errors.multiple_assessment
+                  className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                    formik.touched.multiple_assessment &&
+                    formik.errors.multiple_assessment
                       ? "border-red-500"
                       : ""
-                    }`}
+                  }`}
                 />
               </div>
               {formik.touched.multiple_assessment &&
@@ -507,10 +535,11 @@ const SecondaryForm = () => {
                 }
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.portfoilo && formik.errors.portfoilo
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.portfoilo && formik.errors.portfoilo
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
           </div>
@@ -532,10 +561,11 @@ const SecondaryForm = () => {
                 }
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.sub_enrich_act && formik.errors.sub_enrich_act
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.sub_enrich_act && formik.errors.sub_enrich_act
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
           </div>
@@ -559,156 +589,157 @@ const SecondaryForm = () => {
                 value={formik.values.annual_exam}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${formik.touched.annual_exam && formik.errors.annual_exam
+                className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
+                  formik.touched.annual_exam && formik.errors.annual_exam
                     ? "border-red-500"
                     : ""
-                  }`}
+                }`}
               />
             </div>
           </div>
         </div>
         <hr className="mt-6 border-b-1 border-blueGray-300 pb-6" />
 
-<h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
-  TERM:1 Scholastic
-</h6>
+        <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
+          TERM:1 Scholastic
+        </h6>
 
-<div className="flex flex-wrap pb-10">
-  <div className="w-full lg:w-4/12 px-4">
-    <div className="relative w-full mb-3">
-      <label
-        htmlFor="t1_scholastic_computer"
-        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-      >
-        computer
-      </label>
-      <select
-        id="t1_scholastic_computer"
-        value={formik.values.t1_scholastic_computer}
-        onChange={formik.handleChange}
-        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-      >
-        <option selected>choose a Grade</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="D">D</option>
-      </select>
-    </div>
-  </div>
-  <div className="w-full lg:w-4/12 px-4">
-    <div className="relative w-full mb-3">
-      <label
-        htmlFor="t1_scholastic_drawing"
-        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-      >
-        drawing
-      </label>
-      <select
-        id="t1_scholastic_drawing"
-        value={formik.values.t1_scholastic_drawing}
-        onChange={formik.handleChange}
-        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-      >
-        <option selected>choose a Grade</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="D">D</option>
-      </select>
-    </div>
-  </div>
-  <div className="w-full lg:w-4/12 px-4">
-    <div className="relative w-full mb-3">
-      <label
-        htmlFor="t1_scholastic_deciplin"
-        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-      >
-        deciplin
-      </label>
-      <select
-        id="t1_scholastic_deciplin"
-        value={formik.values.t1_scholastic_deciplin}
-        onChange={formik.handleChange}
-        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-      >
-        <option selected>choose a Grade</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="D">D</option>
-      </select>
-    </div>
-  </div>
-</div>
-<div className="flex flex-wrap">
-  <div className="w-full lg:w-4/12 px-4">
-    <div className="relative w-full mb-3">
-      <label
-        htmlFor="t1_scholastic_gk"
-        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-      >
-        gk
-      </label>
-      <select
-        id="t1_scholastic_gk"
-        value={formik.values.t1_scholastic_gk}
-        onChange={formik.handleChange}
-        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-      >
-        <option selected>choose a Grade</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="D">D</option>
-      </select>
-    </div>
-  </div>
-  <div className="w-full lg:w-4/12 px-4">
-    <div className="relative w-full mb-3">
-      <label
-        htmlFor="t1_scholastic_remark"
-        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-      >
-        remark
-      </label>
-      <select
-        id="t1_scholastic_remark"
-        value={formik.values.t1_scholastic_remark}
-        onChange={formik.handleChange}
-        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-      >
-        <option selected>choose a Grade</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="D">D</option>
-      </select>
-    </div>
-  </div>
-  <div className="w-full lg:w-4/12 px-4">
-    <div className="relative w-full mb-3">
-      <label
-        htmlFor="t1_scholastic_entery"
-        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-      >
-        entery
-      </label>
-      <select
-        id="t1_scholastic_entery"
-        value={formik.values.t1_scholastic_entery}
-        onChange={formik.handleChange}
-        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-      >
-        <option selected>choose a Grade</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-        <option value="D">D</option>
-      </select>
-    </div>
-  </div>
-</div>
+        <div className="flex flex-wrap pb-10">
+          <div className="w-full lg:w-4/12 px-4">
+            <div className="relative w-full mb-3">
+              <label
+                htmlFor="t1_scholastic_computer"
+                className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              >
+                computer
+              </label>
+              <select
+                id="t1_scholastic_computer"
+                value={formik.values.t1_scholastic_computer}
+                onChange={formik.handleChange}
+                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+              >
+                <option selected>choose a Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+          <div className="w-full lg:w-4/12 px-4">
+            <div className="relative w-full mb-3">
+              <label
+                htmlFor="t1_scholastic_drawing"
+                className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              >
+                drawing
+              </label>
+              <select
+                id="t1_scholastic_drawing"
+                value={formik.values.t1_scholastic_drawing}
+                onChange={formik.handleChange}
+                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+              >
+                <option selected>choose a Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+          <div className="w-full lg:w-4/12 px-4">
+            <div className="relative w-full mb-3">
+              <label
+                htmlFor="t1_scholastic_deciplin"
+                className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              >
+                deciplin
+              </label>
+              <select
+                id="t1_scholastic_deciplin"
+                value={formik.values.t1_scholastic_deciplin}
+                onChange={formik.handleChange}
+                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+              >
+                <option selected>choose a Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap">
+          <div className="w-full lg:w-4/12 px-4">
+            <div className="relative w-full mb-3">
+              <label
+                htmlFor="t1_scholastic_gk"
+                className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              >
+                gk
+              </label>
+              <select
+                id="t1_scholastic_gk"
+                value={formik.values.t1_scholastic_gk}
+                onChange={formik.handleChange}
+                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+              >
+                <option selected>choose a Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+          <div className="w-full lg:w-4/12 px-4">
+            <div className="relative w-full mb-3">
+              <label
+                htmlFor="t1_scholastic_remark"
+                className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              >
+                remark
+              </label>
+              <select
+                id="t1_scholastic_remark"
+                value={formik.values.t1_scholastic_remark}
+                onChange={formik.handleChange}
+                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+              >
+                <option selected>choose a Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+          <div className="w-full lg:w-4/12 px-4">
+            <div className="relative w-full mb-3">
+              <label
+                htmlFor="t1_scholastic_entery"
+                className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              >
+                entery
+              </label>
+              <select
+                id="t1_scholastic_entery"
+                value={formik.values.t1_scholastic_entery}
+                onChange={formik.handleChange}
+                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+              >
+                <option selected>choose a Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         <div className="mx-3 flex justify-end">
           <button
