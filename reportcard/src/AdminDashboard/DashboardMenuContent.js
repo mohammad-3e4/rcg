@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-
+import { useSelector,useDispatch } from "react-redux";
+import { setMenuClose } from "../redux/actions";
 import {
   Card,
   Typography,
@@ -28,8 +28,9 @@ export default function DashboardMenuContent() {
   const Admindata = useSelector((state) => state.auth.user.user);
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(location.pathname);
-
+  const dispatch  = useDispatch()
   const handleTabClick = (path) => {
+    dispatch(setMenuClose(false));
     setActiveTab(path);
   };
 

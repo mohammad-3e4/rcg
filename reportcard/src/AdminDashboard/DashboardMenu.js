@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import DashboardMenuContent from "./DashboardMenuContent.js";
+import { useSelector, useDispatch } from "react-redux";
+import { setMenuClose } from "../redux/actions.js";
 
 export default function Admindashboard() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const state = useSelector((state)=>state.Allteachers)
+  const dispatch  = useDispatch()
+
+  
+  const toggleMobileMenuOpen =(value)=>{
+    dispatch(setMenuClose(value));
+  }
 
   return (
     <div className="bg-blueGray-200">
@@ -17,7 +25,7 @@ export default function Admindashboard() {
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
-              onClick={() => setMobileMenuOpen(true)}
+              onClick={()=>toggleMobileMenuOpen(true)}
             >
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
@@ -30,8 +38,8 @@ export default function Admindashboard() {
         <Dialog
           as="div"
           className="lg:hidden flex"
-          open={mobileMenuOpen}
-          onClose={setMobileMenuOpen}
+          open={state.close}
+          onClose={setMenuClose}
         >
           <div className="fixed inset-0 z-50" />
           <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
@@ -39,7 +47,7 @@ export default function Admindashboard() {
               <button
                 type="button"
                 className="-m-2.5 rounded-md p-2.5 text-gray-700"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => toggleMobileMenuOpen(false)}
               >
                 <span className="sr-only">Close menu</span>
                 <XMarkIcon className="h-6 w-6" aria-hidden="true" />

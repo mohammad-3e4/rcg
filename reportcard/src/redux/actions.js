@@ -305,5 +305,9 @@ export const setSelectedValues = (selectedValues) => ({
   type: 'SET_SELECTED_VALUES',
   payload: selectedValues,
 });
+export const setMenuClose= (close) => ({
+  type: 'CLOSE',
+  payload: close,
+});
 
 /////////////////////////////////////////////////

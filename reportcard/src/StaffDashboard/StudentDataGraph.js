@@ -44,7 +44,7 @@ const GraphComponent = () => {
           ].includes(key)
       )
       .map((key) => key.slice(3));
-  
+
     const gradeCategories = {
       A1: { min: 91, max: 100 },
       A2: { min: 81, max: 90 },
@@ -55,10 +55,10 @@ const GraphComponent = () => {
       D: { min: 33, max: 40 },
       E: { min: 0, max: 32 },
     };
-  
+
     const term1ChartsData = subjects.map((subject) => {
       const genderCategories = ["Male", "Female"];
-  
+
       const datasets = genderCategories.map((gender) => {
         const data = Object.keys(gradeCategories).map((grade) => {
           const filteredData = dataFromApi.filter(
@@ -69,7 +69,7 @@ const GraphComponent = () => {
           );
           return filteredData.length;
         });
-  
+
         return {
           label: `${gender} - ${subject}`,
           data: data,
@@ -78,16 +78,16 @@ const GraphComponent = () => {
           borderWidth: 1,
         };
       });
-  
+
       return {
         labels: Object.keys(gradeCategories),
         datasets: datasets,
       };
     });
-  
+
     return term1ChartsData;
   }
-  
+
   function generateChartsDataForSecondry(dataFromApi) {
     const subjects = Object.keys(dataFromApi[0])
       .filter(
@@ -151,6 +151,62 @@ const GraphComponent = () => {
     return term1ChartsData;
   }
 
+  function generateChartsDataSenSec(dataFromApi) {
+    // Extracting subjects dynamically from the object keys
+    const subjects = Object.keys(dataFromApi)
+      .filter(
+        (key) =>
+          key !== "gender" &&
+          key !== "id" &&
+          key !== "adm_no" &&
+          key !== "overall" &&
+          key !== "overall_grade"
+      )
+      .map((key) => key);
+
+    const gradeCategories = {
+      A1: { min: 91, max: 100 },
+      A2: { min: 81, max: 90 },
+      B1: { min: 71, max: 80 },
+      B2: { min: 61, max: 70 },
+      C1: { min: 51, max: 60 },
+      C2: { min: 41, max: 50 },
+      D: { min: 33, max: 40 },
+      E: { min: 0, max: 32 },
+    };
+
+    const term1ChartsData = subjects.map((subject) => {
+      const genderCategories = ["Male", "Female"];
+
+      const datasets = genderCategories.map((gender) => {
+        const data = Object.keys(gradeCategories).map((grade) => {
+          const filteredData = dataFromApi.filter(
+            (student) =>
+              student.gender === gender &&
+              (student[subject] ?? 0) >= gradeCategories[grade].min &&
+              (student[subject] ?? 0) <= gradeCategories[grade].max
+          );
+          return filteredData.length;
+        });
+
+        return {
+          label: `${gender} - ${subject}`,
+          data: data,
+          backgroundColor: getRandomColor(),
+          borderColor: getRandomColor(),
+          borderWidth: 1,
+        };
+      });
+
+      return {
+        labels: Object.keys(gradeCategories),
+        datasets: datasets,
+      };
+    });
+
+    return term1ChartsData;
+  }
+
   useEffect(() => {
     const fetchDataFromApi = async () => {
       try {
@@ -165,6 +221,9 @@ const GraphComponent = () => {
           setTerm1ChartData(term1ChartData);
         } else if (selectedClassNumber >= 9) {
           const term1ChartData = generateChartsDataForSecondry(dataFromApi);
+          setTerm1ChartData(term1ChartData);
+        } else if (selectedClassNumber >= 11) {
+          const term1ChartData = generateChartsDataSenSec(dataFromApi);
           setTerm1ChartData(term1ChartData);
         }
       } catch (error) {

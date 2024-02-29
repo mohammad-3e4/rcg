@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { connect } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { connect, useSelector } from "react-redux";
 import { loginUser } from "../redux/actions";
 import {  useNavigate } from "react-router-dom";
 import HomePageMenu from "../Feature/HomePageMenu";
@@ -9,8 +9,11 @@ import loginpageimg from "../static/loginpageimg.jpg";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+
+
 const AdminLogin = ({ loginUser}) => {
-  
+  const state = useSelector((state)=>state)
+  console.log(state.auth.user);
   const [userError, setUserError] = useState("");
   const history = useNavigate();
   const initialValues = {
@@ -40,6 +43,12 @@ const AdminLogin = ({ loginUser}) => {
     },
   });
 
+
+  useEffect(()=>{
+  if(state.auth.user.token){
+    history('/admindashboard');
+  }
+  })
   return (
     <>
       <HomePageMenu />

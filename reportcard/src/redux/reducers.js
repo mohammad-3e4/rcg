@@ -35,6 +35,7 @@ const initialState = {
   user: null,
   loading: false,
   error: null,
+  close: false,
 };
 export const studentReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -177,6 +178,9 @@ export const teacherReducer = (state = initialState, action) => {
       return { loading: false, Allteachers: action.payload, error: "" };
     case FETCH_TEACHERS_FAILURE:
       return { loading: false, Allteachers: [], error: action.payload };
+    case "CLOSE":
+      return { ...state, close: action.payload };
+
     default:
       return state;
   }
@@ -239,7 +243,7 @@ export const classesReducer = (state = initialState, action) => {
 ///////////////////////////////
 export const selectReducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'SET_SELECTED_VALUES':
+    case "SET_SELECTED_VALUES":
       return { ...state, selectedValues: action.payload };
     default:
       return state;
