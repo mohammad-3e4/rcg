@@ -256,6 +256,7 @@ router.get("/reportcardtwo/:selectedClass/:selectedSection/:adm_no", async (req,
         AND table_name LIKE '${selectedClass}_${selectedSection}%'
         AND table_name NOT LIKE '${selectedClass}_${selectedSection}_%total'
         AND table_name NOT LIKE '${selectedClass}_${selectedSection}_%biodata'
+        AND table_name NOT LIKE '${selectedClass}_${selectedSection}_%vocational'
     `;
 
     db.query(queryTableNames, (err, results) => {
@@ -310,8 +311,77 @@ router.get("/reportcardtwo/:selectedClass/:selectedSection/:adm_no", async (req,
   }
 });
 
+router.post('/vocational', (req, res) => {
+  const data = req.body;
+
+  // Generate table name based on class_name, section, and subject
+  const tableName = `${data.class_name}_${data.section}_${data.subject}`;
+
+  // Check if table exists, create if not
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS ${tableName} (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      student_name VARCHAR(255),
+      adm_no VARCHAR(255),
+      theory_max INT,
+      theory_obtain INT,
+      practical_max INT,
+      practical_obtain INT
+    )
+  `;
+  db.query(createTableQuery, (err, result) => {
+    if (err) {
+      console.error('Error creating table:', err);
+      res.status(500).send('Error creating table');
+      return;
+    }
+    console.log('Table created or already exists');
 
 
+    const checkStudentQuery = `
+      SELECT * FROM ${tableName} WHERE adm_no = ?
+    `;
+    db.query(checkStudentQuery, [data.adm_no], (err, rows) => {
+      if (err) {
+        console.error('Error checking student:', err);
+        res.status(500).send('Error checking student');
+        return;
+      }
+
+      if (rows.length > 0) {
+        res.status(400).send('Student data already exists');
+        return;
+      }
+
+      // Insert data into the table
+      const insertQuery = `
+        INSERT INTO ${tableName} 
+        (student_name, adm_no, theory_max, theory_obtain, practical_max, practical_obtain) 
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+      const values = [
+        data.student_name,
+        data.adm_no,
+        data.theory_max,
+        data.theory_obtain,
+        data.practical_max,
+        data.practical_obtain
+      ];
+
+      db.query(insertQuery, values, (err, result) => {
+        if (err) {
+          console.error('Error saving data to MySQL:', err);
+          res.status(500).send('Error saving data');
+          return;
+        }
+        console.log('Data saved to MySQL');
+        res.status(200).send('Data saved successfully');
+      });
+    });
+  });
+});
+
+ 
 router.get("/reportcardthree/:selectedClass/:selectedSection/:adm_no", async (req, res) => {
   const { selectedClass, selectedSection, adm_no } = req.params;
   try {
