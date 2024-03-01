@@ -149,7 +149,7 @@ const SecondaryForm = () => {
     formik.setFieldValue("subject", selectedSubject);
     formikVocation.setFieldValue("class_name", selectedClass);
     formikVocation.setFieldValue("section", selectedSection);
-    formikVocation.setFieldValue("subject", `${selectedSubject}_vocational`);
+    formikVocation.setFieldValue("subject", `vocational_${selectedSubject}`);
     const fetchBiodata = async () => {
       if (selectedClass && selectedSection) {
         const tableName = `${selectedClass}_${selectedSection.toLowerCase()}_biodata`;
