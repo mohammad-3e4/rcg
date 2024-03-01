@@ -421,33 +421,6 @@ router.post("/vocational", (req, res) => {
   });
 });
 
-// router.get("/vocational/:section/:adm_no", (req, res) => {
-//   const adm_no = req.params.adm_no;
-//   const section = req.params.section;
-//   const subject = req.params.subject;
-//   const tableName = `ninth_${section}_vocational_physics`;
-
-//   const selectQuery = `
-//     SELECT * FROM ${tableName} WHERE adm_no = ?
-//   `;
-
-//   db.query(selectQuery, [adm_no], (err, rows) => {
-//     if (err) {
-//       console.error("Error retrieving data from MySQL:", err);
-//       res.status(500).send("Error retrieving data");
-//       return;
-//     }
-
-//     if (rows.length === 0) {
-//       res.status(404).send("No data found for the provided admission number");
-//       return;
-//     }
-
-//     // Data found, send it back in the response
-//     res.status(200).json(rows[0]); // Assuming you want to send only the first row found
-//   });
-// });
-
 router.get(
   "/reportcardthree/:selectedClass/:selectedSection/:adm_no",
   async (req, res) => {

@@ -213,8 +213,8 @@ const ReportCardThree = ({
                   <tbody className="capitalize ">
                     {reportCardData.map((dataRow, index) => (
                       <tr className="capitalize myborder" key={index}>
-                        <td>01</td>
-                        <td colSpan={3}>{dataRow.subject.split("_")[2]} {dataRow.subject.split("_")[3]}</td>
+                        <td className="uppercase">{dataRow.subject.split("_")[3]}</td>
+                        <td colSpan={3}>{dataRow.subject.split("_")[2]} </td>
                        
                         <td>{dataRow.theory_max}</td>
                         <td>{dataRow.theory_obtain}</td>

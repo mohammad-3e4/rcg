@@ -36,6 +36,9 @@ export default function Teacher() {
   const { Allclasses, loading: classesLoading } = useSelector(
     (state) => state.Allclasses
   );
+  const loggedinUser = useSelector(
+    (state) => state.auth.user.user
+  );
 
   useEffect(() => {
     dispatch(fetchTeachers());
@@ -170,12 +173,12 @@ export default function Teacher() {
         <div className="mb-4 md:mb-0 md:w-full pr-2">
           <ul
             role="list"
-            className="divide-y divide-gray-100 flex flex-wrap gap-5 justify-center"
+            className="divide-y divide-gray-100 flex md:flex-wrap gap-5 justify-center"
           >
-            {teacherData.map((teacher) => (
+            {teacherData.filter((item)=>item.teacher_id !== loggedinUser.teacher_id).map((teacher) => (
               <li
                 key={teacher.email}
-                className="flex justify-between gap-x-6 py-5 w-[45%]  px-3 bg-white  shadow-xl rounded-lg"
+                className="flex justify-between gap-x-6 py-5 w-full md:w-[45%]  px-3 bg-white  shadow-xl rounded-lg"
               >
                 <div className="flex min-w-0 gap-x-4">
                   <img
