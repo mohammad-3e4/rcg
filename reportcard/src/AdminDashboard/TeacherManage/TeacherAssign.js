@@ -165,7 +165,7 @@ export default function Teacher() {
       )}
       <ul className="lg:flex lg:flex-wrap lg:gap-7">
         {teacherData
-          .filter((item) => item.teacher_id !== loggedinUser.teacher_id)
+          .filter((item) => item.email !== 'parth@gmail.com')
           .map((teacher) => (
             <li
               key={teacher.email}

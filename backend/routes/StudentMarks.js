@@ -3,22 +3,36 @@ const db = require("../connection");
 
 const router = express.Router();
 
-router.post("/marks", (req, res) => {
-  const { selectedClass, selectedSubject, selectedSection } = req.body;
-  let query;
-  let section = selectedSection.toLowerCase();
-  if (selectedClass && selectedSubject) {
-    query = `SELECT * FROM ${selectedClass}_${section}_biodata JOIN ${selectedClass}_${section}_${selectedSubject} on ${selectedClass}_${section}_biodata.adm_no = ${selectedClass}_${section}_${selectedSubject}.Adm_no   ;`;
-  }
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("MySQL query error:", err);
-      res.status(500).json({ message: "Internal Server Error" });
-    } else {
-      res.json(results);
+router.post("/marks", async (req, res) => {
+  try {
+    const { selectedClass, selectedSubject, selectedSection } = req.body;
+    
+    if (!selectedClass || !selectedSubject || !selectedSection) {
+      return res.status(400).json({ message: "Selected class, subject, and section are required." });
     }
-  });
+
+    let query;
+    const section = selectedSection.toLowerCase();
+    
+    query = `SELECT * FROM ${selectedClass}_${section}_biodata JOIN ${selectedClass}_${section}_${selectedSubject} on ${selectedClass}_${section}_biodata.adm_no = ${selectedClass}_${section}_${selectedSubject}.Adm_no;`;
+    
+    const results = await new Promise((resolve, reject) => {
+      db.query(query, (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching marks:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
+
 router.put("/marks/:adm_no", (req, res) => {
   const {
     updatedStudentMarks,
