@@ -11,11 +11,30 @@ router.post("/marks", async (req, res) => {
       return res.status(400).json({ message: "Selected class, subject, and section are required." });
     }
 
-    let query;
+
+    /////////////////////////////////////
+    const selectedPattern = `${selectedClass}_${selectedSection}_${selectedSubject}`;
+    const tablequery = `
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'gurunanak2024'
+        AND table_name LIKE '${selectedPattern}%';
+    `;
     
-    query = `SELECT * FROM ${selectedClass}_${selectedSection}_biodata JOIN ${selectedClass}_${selectedSection}_${selectedSubject} on ${selectedClass}_${selectedSection}_biodata.adm_no = ${selectedClass}_${selectedSection}_${selectedSubject}.adm_no;`;
+    try {
+      const results = await new Promise((resolve, reject) => {
+        db.query(tablequery, (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+          
+    query = `SELECT * FROM ${selectedClass}_${selectedSection}_biodata JOIN ${results[0].TABLE_NAME} on ${selectedClass}_${selectedSection}_biodata.adm_no = ${results[0].TABLE_NAME}.adm_no;`;
     
-    const results = await new Promise((resolve, reject) => {
+    const response = await new Promise((resolve, reject) => {
       db.query(query, (err, results) => {
         if (err) {
           reject(err);
@@ -25,7 +44,16 @@ router.post("/marks", async (req, res) => {
       });
     });
 
-    res.json(results);
+    res.json(response);
+    
+      // Handle the results here
+    } catch (error) {
+      console.error("Error querying tables:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    /////////////////////////////////////
+    // let query;
+
   } catch (error) {
     console.error("Error fetching marks:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -44,9 +72,7 @@ router.put("/marks/:adm_no", (req, res) => {
   let section = selectedSection.toLowerCase();
   if (selectedClass && selectedSubject) {
     query = `UPDATE ${selectedClass}_${section}_${selectedSubject} SET ? WHERE adm_no = "${adm_no}"`;
-  } else {
-    query = `UPDATE fifthenglish SET ? WHERE adm_no = ${adm_no}`;
-  }
+  } 
   db.query(query, [updatedStudentMarks], (err, results) => {
     if (err) {
       console.error("MySQL query error:", err);

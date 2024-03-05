@@ -242,6 +242,12 @@ async function csvHandler(filePath,class_name,subject_name) {
           return;
         }
       }
+      else  if(class_name=="kg" || class_name=="nursery" || class_name=="prenursery"){
+        if (lineCount === 1) {
+          subjects = line.split(',').map(subject => subject.trim());
+          return;
+        }
+      }
       else if(subject_name.includes('vocational')){
         if (lineCount === 1) {
           subjects = line.split(',').map(subject => subject.trim());
@@ -272,6 +278,7 @@ async function csvHandler(filePath,class_name,subject_name) {
       reject(err); 
     });
   });
+  console.log(csvData)
   return csvData;
 }
 
@@ -283,6 +290,9 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
   if(subject_code){
     tablename = `${class_name}_${section_name}_${subject_name}_${subject_code}`
   }
+  else if(class_name=="kg" || class_name=="nursery" || class_name=="prenursery"){
+    tablename = `${class_name}_${section_name}_total`
+  }
  else{
     tablename = `${class_name}_${section_name}_${subject_name}`;
   }
@@ -291,10 +301,10 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
     let csvData;
        csvData = await csvHandler(filePath,class_name,subject_name);
     let createTableQuery = `CREATE TABLE IF NOT EXISTS ${tablename} (`;
-    createTableQuery += "adm_no VARCHAR(255) UNIQUE, "; // Ensure adm_no is unique
+    createTableQuery += "adm_no VARCHAR(45) UNIQUE, "; // Ensure adm_no is unique
     for (const column in csvData[0]) {
       if (column !== "adm_no") {
-        createTableQuery += `${column} VARCHAR(255), `;
+        createTableQuery += `${column} VARCHAR(45), `;
       }
     }
     createTableQuery = createTableQuery.slice(0, -2); // Remove the last comma and space
@@ -373,10 +383,19 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
           const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (adm_no, t1_${subject_name}) VALUES ('${row.adm_no}', ${row.overall})`;
           await db.promise().query(insertQuery2);
         }
+      }
+      else if (class_name == "kg" || class_name == "nursery" || class_name == "prenursery") {
+            if (studentMarksExists2) {
+              const updateQuery = `UPDATE ${class_name}_${section_name}_total SET ${Object.keys(row)} = ${Object.values(row)} WHERE adm_no = '${row.adm_no}'`;
+              await db.promise().query(updateQuery);
+            } else {
+              const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (${Object.keys(row)}) VALUES (${Object.values(row)})`;
+              await db.promise().query(insertQuery2);
+            }
       } else {
         if (studentMarksExists2) {
           // Update data in the total marks table
-          const updateQuery = `UPDATE ${class_name}_${section_name}_total SET t1_${subject_name} = ${row.total_marks_term_1}, t2_${subject_name} = ${row.total_marks_term_2} WHERE adm_no = '${row.adm_no}'`;
+          const updateQuery = `UPDATE ${class_name}_${section_name}_total SET ${subject_name} = ${row.total_marks_term_1}, t2_${subject_name} = ${row.total_marks_term_2} WHERE adm_no = '${row.adm_no}'`;
           await db.promise().query(updateQuery);
         } else {
           // Insert data into the total marks table
@@ -467,6 +486,24 @@ router.post(
   }
 );
 
+
+
+
+const extractCsvData = async (filePath) => {
+  const results = [];
+
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (data) => results.push(data))
+      .on("end", () => {
+        resolve(results);
+      })
+      .on("error", (error) => {
+        reject(error);
+      });
+  });
+};
 router.post(
   "/upload/student-data",
   uploadStudentsData.single("file"),
