@@ -6,15 +6,14 @@ const router = express.Router();
 router.post("/marks", async (req, res) => {
   try {
     const { selectedClass, selectedSubject, selectedSection } = req.body;
-    
+    console.log(selectedClass, selectedSubject, selectedSection )
     if (!selectedClass || !selectedSubject || !selectedSection) {
       return res.status(400).json({ message: "Selected class, subject, and section are required." });
     }
 
     let query;
-    const section = selectedSection.toLowerCase();
     
-    query = `SELECT * FROM ${selectedClass}_${section}_biodata JOIN ${selectedClass}_${section}_${selectedSubject} on ${selectedClass}_${section}_biodata.adm_no = ${selectedClass}_${section}_${selectedSubject}.Adm_no;`;
+    query = `SELECT * FROM ${selectedClass}_${selectedSection}_biodata JOIN ${selectedClass}_${selectedSection}_${selectedSubject} on ${selectedClass}_${selectedSection}_biodata.adm_no = ${selectedClass}_${selectedSection}_${selectedSubject}.adm_no;`;
     
     const results = await new Promise((resolve, reject) => {
       db.query(query, (err, results) => {
@@ -280,7 +279,7 @@ router.get(
         AND table_name LIKE '${selectedClass}_${selectedSection}%'
         AND table_name NOT LIKE '${selectedClass}_${selectedSection}_%total'
         AND table_name NOT LIKE '${selectedClass}_${selectedSection}_%biodata'
-        AND table_name NOT LIKE '${selectedClass}_${selectedSection}_%vocational'
+        AND table_name NOT LIKE '${selectedClass}_${selectedSection}__%vocational'
     `;
 
       db.query(queryTableNames, (err, results) => {
@@ -325,8 +324,8 @@ router.get(
                   NULL AS portfoilo,
                   NULL AS sub_enrich_act,
                   NULL AS annual_exam,
-                  NULL AS grand_total,
-                  NULL AS final_grade,
+                  grand_total,
+                  final_grade,
                   theory_max,
                   theory_obtain,
                   practical_max,

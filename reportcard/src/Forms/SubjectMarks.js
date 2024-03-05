@@ -7,6 +7,12 @@ import SeniorSecondaryForm from "./SeniorSecondryForm";
 import Nursery from "./Nursery";
 import { URL } from "../URL";
 const SubjectMarks = () => {
+  const [subjectCode, setSubjectCode] = useState();
+  const [checked, setChecked] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setChecked(!checked);
+  };
   const selectedVal = useSelector(
     (state) => state.selectedValues.selectedValues
   );
@@ -25,7 +31,15 @@ const SubjectMarks = () => {
       formData.append("file", csvFile);
       formData.append("class_name", selectedClass);
       formData.append("section_name", selectedSection);
-      formData.append("subject_name", selectedSubject);
+      if(selectedClassNumber >10){
+      formData.append("subject_code", subjectCode);
+      }
+      if(checked){
+        formData.append("subject_name", 'vocational_'+selectedSubject);
+      }else{
+        formData.append("subject_name", selectedSubject);
+      }
+
       // Append other form data as needed
       const response = await axios.post(`${URL}/admin/upload/marks`, formData, {
         headers: {
@@ -62,6 +76,43 @@ const SubjectMarks = () => {
                   <h6 className="text-blueGray-700 text-xl font-bold lg:w-3/12">
                     Subject Marks
                   </h6>
+
+                  {selectedClassNumber == 9 || selectedClassNumber == 10 ? (
+                    <div>
+                      <div className="flex items-center">
+                        <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase text-start mr-3">
+                          Vocational subject
+                        </h6>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={handleCheckboxChange}
+                          className="form-checkbox  text-indigo-600 transition duration-150 ease-in-out rounded-full mb-3 "
+                        />
+                      </div>
+                    </div>
+                  ) : selectedClassNumber > 10 ? (
+                    <>
+                      <div className="w-full lg:w-4/12 px-4">
+                        <label
+                          htmlFor="subject_code"
+                          className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                        >
+                          Subject Code*:
+                        </label>
+                        <input
+                          type="text"
+                          id="subject_code"
+                          value={subjectCode}
+                          onChange={(e) => setSubjectCode(e.target.value)}
+                          className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-gray-200 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 
+                  
+                          `}
+                        />
+                      </div>
+                      <hr className="mt-6 border-b-1 border-blueGray-300 pb-6" />
+                    </>
+                  ) : null}
                   <div className="grid grid-cols-3  gap-2 items-center mb-3 w-1/2">
                     <label
                       className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
