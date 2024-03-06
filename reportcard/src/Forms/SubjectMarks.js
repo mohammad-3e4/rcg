@@ -182,19 +182,19 @@ const SubjectMarks = () => {
                    <div className="grid grid-cols-3 gap-2 items-center mb-3 w-1/4  mx-2">
                     <label
                       className="block  uppercase text-blueGray-600 text-xs font-bold mb-2 col-span-3"
-                      htmlFor="imagename"
+                      htmlFor="marksename"
                     >
-                      Upload scholastic csv*
+                      Upload marks csv*
                     </label>
                     <div className="flex flex-col col-span-3">
                       <input
                         type="file"
-                        id="imagename"
+                        id="marksename"
                         onChange={handleFileChange}
                         className="hidden"
                       />
                       <label
-                        htmlFor="imagename"
+                        htmlFor="marksename"
                         className="border-2 border-dashed text-xs border-gray-500 cursor-pointer py-2 px-3 w-full text-center rounded-lg hover:bg-white"
                       >
                        {csvFile ? csvFile.name.slice(0, 23) : "Choose a csv"}
