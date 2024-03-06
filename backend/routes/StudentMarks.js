@@ -447,12 +447,13 @@ router.post("/vocational", (req, res) => {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS ${tableName} (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      student_name VARCHAR(255),
       adm_no VARCHAR(255),
       theory_max INT,
       theory_obtain INT,
       practical_max INT,
-      practical_obtain INT
+      practical_obtain INT,
+      grand_total int,
+      final_grade varchar(255)
     )
   `;
   db.query(createTableQuery, (err, result) => {
@@ -481,16 +482,17 @@ router.post("/vocational", (req, res) => {
       // Insert data into the table
       const insertQuery = `
         INSERT INTO ${tableName} 
-        (student_name, adm_no, theory_max, theory_obtain, practical_max, practical_obtain) 
-        VALUES (?, ?, ?, ?, ?, ?)
+        (adm_no, theory_max, theory_obtain, practical_max, practical_obtain, grand_total ,final_grade ) 
+        VALUES (?, ?, ?, ?, ?, ?,?)
       `;
       const values = [
-        data.student_name,
         data.adm_no,
         data.theory_max,
         data.theory_obtain,
         data.practical_max,
         data.practical_obtain,
+        data.theory_obtain + data.practical_obtain,
+        "b",
       ];
 
       db.query(insertQuery, values, (err, result) => {
