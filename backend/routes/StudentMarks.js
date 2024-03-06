@@ -109,23 +109,69 @@ router.get(
   }
 );
 /////////////////////
-
 router.get("/primarygrade/:selectedClass/:adm_no", (req, res) => {
-  const adm_no = req.params.adm_no;
-  const selectedClass = req.params.selectedClass;
-  let query;
-  if (selectedClass && adm_no) {
-    query = `SELECT * FROM ${selectedClass}_a_total where adm_no='${adm_no}';`;
+  const { selectedClass, adm_no } = req.params;
+  try {
+    const queryTableNames = `
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'gurunanak2024'
+        AND table_name LIKE '${selectedClass}_a%'
+        AND table_name NOT LIKE '${selectedClass}_a_%total'
+        AND table_name NOT LIKE '${selectedClass}_a_%biodata'
+    `;
+
+    db.query(queryTableNames, (err, results) => {
+      if (err) {
+        console.error("MySQL query error:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+      } else {
+        const tableRows = results.map((result) => result.TABLE_NAME);
+
+        if (tableRows && tableRows.length > 0) {
+          const queries = tableRows.map(
+            (table) => `
+              SELECT *
+              FROM ${table}
+              WHERE ${table}.adm_no = '${adm_no}'`
+          );
+
+          // Execute each query separately
+          const promises = queries.map(query => new Promise((resolve, reject) => {
+            db.query(query, (err, results) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(results);
+              }
+            });
+          }));
+
+          // Wait for all queries to complete
+          Promise.all(promises)
+            .then((results) => {
+              // Concatenate all results into a single array
+              const mergedResults = [].concat(...results);
+              res.json(mergedResults);
+            })
+            .catch((error) => {
+              console.error("MySQL query error:", error);
+              res.status(500).json({ error: "Internal Server Error" });
+            });
+        } else {
+          console.error("No eligible table names found.");
+          res.status(404).json({ message: "No eligible table names found." });
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).send("Internal Server Error");
   }
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("MySQL query error:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-    } else {
-      res.json(results);
-    }
-  });
 });
+
+
+
 ///////////////////////
 // POST endpoint to save data to the database
 router.post("/nursery", (req, res) => {

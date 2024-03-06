@@ -10,7 +10,7 @@ const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const uploadcsv = multer({ dest: "uploads/" });
 const uploadStudentsData = multer({ dest: "students/" });
-const readline = require('readline');
+const readline = require("readline");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -220,13 +220,12 @@ router.post("/bio-data", async (req, res) => {
   }
 });
 
-
-async function csvHandler(filePath,class_name,subject_name) {
+async function csvHandler(filePath, class_name, subject_name) {
   const fileStream = fs.createReadStream(filePath);
 
   const lines = readline.createInterface({
     input: fileStream,
-    crlfDelay: Infinity
+    crlfDelay: Infinity,
   });
 
   let lineCount = 0;
@@ -234,110 +233,96 @@ async function csvHandler(filePath,class_name,subject_name) {
   const csvData = [];
 
   await new Promise((resolve, reject) => {
-    lines.on('line', (line) => {
-      lineCount++;
-      if(class_name=="eleven" || class_name=="twelth"){
-        if (lineCount === 1) {
-          subjects = line.split(',').map(subject => subject.trim());
-          return;
-        }
-      }
-      else  if(class_name=="kg" || class_name=="nursery" || class_name=="prenursery"){
-        if (lineCount === 1) {
-          subjects = line.split(',').map(subject => subject.trim());
-          return;
-        }
-      }
-      else if(subject_name.includes('vocational')){
-        if (lineCount === 1) {
-          subjects = line.split(',').map(subject => subject.trim());
-          return;
-        }
-      }
-      else{
-        if (lineCount === 1) return;
-        if (lineCount === 2) {
-          subjects = line.split(',').map(subject => subject.trim());
-          return;
-        }
-      }
-      const marks = line.split(',').map(mark => mark.trim());
-      const studentData = marks.reduce((acc, mark, index) => {
-        if (subjects[index] === 'adm_no') {
-          acc[subjects[index]] = mark;
+    lines
+      .on("line", (line) => {
+        lineCount++;
+        if (class_name == "eleven" || class_name == "twelth") {
+          if (lineCount === 1) {
+            subjects = line.split(",").map((subject) => subject.trim());
+            return;
+          }
+        } else if (
+          class_name == "kg" ||
+          class_name == "nursery" ||
+          class_name == "prenursery"
+        ) {
+          if (lineCount === 1) {
+            subjects = line.split(",").map((subject) => subject.trim());
+            return;
+          }
+        } else if (subject_name.includes("vocational")) {
+          if (lineCount === 1) {
+            subjects = line.split(",").map((subject) => subject.trim());
+            return;
+          }
         } else {
-          acc[subjects[index]] = isNaN(parseInt(mark, 10)) ? mark : parseInt(mark, 10);
+          if (lineCount === 1) return;
+          if (lineCount === 2) {
+            subjects = line.split(",").map((subject) => subject.trim());
+            return;
+          }
         }
-        return acc;
-      }, {});
+        const marks = line.split(",").map((mark) => mark.trim());
+        const studentData = marks.reduce((acc, mark, index) => {
+          if (subjects[index] === "adm_no") {
+            acc[subjects[index]] = mark;
+          } else {
+            acc[subjects[index]] = isNaN(parseInt(mark, 10))
+              ? mark
+              : parseInt(mark, 10);
+          }
+          return acc;
+        }, {});
 
-      csvData.push(studentData);
-    }).on('close', () => {
-      resolve(); 
-    }).on('error', (err) => {
-      reject(err); 
-    });
+        csvData.push(studentData);
+      })
+      .on("close", () => {
+        resolve();
+      })
+      .on("error", (err) => {
+        reject(err);
+      });
   });
-  console.log(csvData)
   return csvData;
 }
 
 router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
   const { path: filePath } = req.file;
-  const { class_name, section_name, subject_name ,subject_code} = req.body;
-  
+  const { class_name, section_name, subject_name, subject_code } = req.body;
+  console.log(req.body)
   let tablename;
-  if(subject_code){
-    tablename = `${class_name}_${section_name}_${subject_name}_${subject_code}`
-  }
-  else if(class_name=="kg" || class_name=="nursery" || class_name=="prenursery"){
-    tablename = `${class_name}_${section_name}_total`
-  }
- else{
+  if (subject_code) {
+    tablename = `${class_name}_${section_name}_${subject_name}_${subject_code}`;
+  } else {
     tablename = `${class_name}_${section_name}_${subject_name}`;
   }
   console.log(tablename)
   try {
     let csvData;
-       csvData = await csvHandler(filePath,class_name,subject_name);
+    csvData = await csvHandler(filePath, class_name, subject_name);
     let createTableQuery = `CREATE TABLE IF NOT EXISTS ${tablename} (`;
-    createTableQuery += "adm_no VARCHAR(45) UNIQUE, "; // Ensure adm_no is unique
+    createTableQuery += "adm_no VARCHAR(255) UNIQUE, "; // Ensure adm_no is unique
     for (const column in csvData[0]) {
       if (column !== "adm_no") {
-        createTableQuery += `${column} VARCHAR(45), `;
+        createTableQuery += `${column} VARCHAR(255), `;
       }
     }
     createTableQuery = createTableQuery.slice(0, -2); // Remove the last comma and space
     createTableQuery += ")";
     await db.promise().query(createTableQuery);
 
-    // Check if students already exist
     for (const row of csvData) {
       // Check if student exists in the biodata table
       const studentExistsQuery = `SELECT COUNT(*) AS count FROM ${class_name}_${section_name}_biodata WHERE adm_no = ?`;
       const [studentExistsResult] = await db
         .promise()
-        .query(studentExistsQuery, [row['adm_no']]);
+        .query(studentExistsQuery, [row.adm_no]);
       const studentExists = studentExistsResult[0].count > 0;
       if (!studentExists) {
         return res
           .status(400)
-          .json({ error: `Student with adm_no ${row['adm_no']} does not exist` });
+          .json({ error: `Student with adm_no ${row.adm_no} does not exist` });
       }
-
-      // If student exists, proceed with checking marks table and insertion
-      // Check if student exists in the marks table
-      const studentMarksExistsQuery = `SELECT COUNT(*) AS count FROM ${tablename} WHERE adm_no = ?`;
-      const studentMarksExistsQuery2 = `SELECT COUNT(*) AS count FROM ${class_name}_${section_name}_total WHERE adm_no = ?`;
-      const [studentMarksExistsResult] = await db
-        .promise()
-        .query(studentMarksExistsQuery, [row.adm_no]);
-      const [studentMarksExistsResult2] = await db
-        .promise()
-        .query(studentMarksExistsQuery2, [row.adm_no]);
-
-      const studentMarksExists = studentMarksExistsResult[0].count > 0;
-      const studentMarksExists2 = studentMarksExistsResult2[0].count > 0;
 
       let columns = "adm_no";
       let values = `'${row.adm_no}'`;
@@ -347,6 +332,26 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
           values += `, '${row[column]}'`;
         }
       }
+      // If student exists, proceed with checking marks table and insertion
+      // Check if student exists in the marks table
+      const studentMarksExistsQuery = `SELECT COUNT(*) AS count FROM ${tablename} WHERE adm_no = ?`;
+      const [studentMarksExistsResult] = await db
+        .promise()
+        .query(studentMarksExistsQuery, [row.adm_no]);
+      const studentMarksExists = studentMarksExistsResult[0].count > 0;
+
+      let studentMarksExists2;
+      console.log(class_name);
+      if (class_name !== "kg")  {
+        if(class_name !== "nursery"){
+          if(class_name !== "prenursery"){
+        const studentMarksExistsQuery2 = `SELECT COUNT(*) AS count FROM ${class_name}_${section_name}_total WHERE adm_no = ?`;
+        const [studentMarksExistsResult2] = await db
+          .promise()
+          .query(studentMarksExistsQuery2, [row.adm_no]);
+        studentMarksExists2 = studentMarksExistsResult2[0].count > 0;
+      }}}
+
       if (!studentMarksExists) {
         // Insert data into the marks table
         const insertQuery = `INSERT INTO ${tablename} (${columns}) VALUES (${values})`;
@@ -366,15 +371,20 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
 
       if (class_name == "ninth" || class_name == "ten") {
         if (studentMarksExists2) {
-          const updateQuery = `UPDATE ${class_name}_${section_name}_total SET t1_${subject_name.replace("vocational_", "")} = ${row.grand_total} WHERE adm_no = '${row.adm_no}'`;
+          const updateQuery = `UPDATE ${class_name}_${section_name}_total SET t1_${subject_name.replace(
+            "vocational_",
+            ""
+          )} = ${row.grand_total} WHERE adm_no = '${row.adm_no}'`;
           await db.promise().query(updateQuery);
         } else {
           // Insert data into the total marks table
-          const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (adm_no, t1_${subject_name.replace("vocational_", "")}) VALUES ('${row.adm_no}', ${row.grand_total})`;
+          const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (adm_no, t1_${subject_name.replace(
+            "vocational_",
+            ""
+          )}) VALUES ('${row.adm_no}', ${row.grand_total})`;
           await db.promise().query(insertQuery2);
         }
-      }
-      else if (class_name == "eleven" || class_name == "twelth") {
+      } else if (class_name == "eleven" || class_name == "twelth") {
         if (studentMarksExists2) {
           const updateQuery = `UPDATE ${class_name}_${section_name}_total SET t1_${subject_name} = ${row.overall} WHERE adm_no = '${row.adm_no}'`;
           await db.promise().query(updateQuery);
@@ -383,24 +393,25 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
           const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (adm_no, t1_${subject_name}) VALUES ('${row.adm_no}', ${row.overall})`;
           await db.promise().query(insertQuery2);
         }
-      }
-      else if (class_name == "kg" || class_name == "nursery" || class_name == "prenursery") {
-            if (studentMarksExists2) {
-              const updateQuery = `UPDATE ${class_name}_${section_name}_total SET ${Object.keys(row)} = ${Object.values(row)} WHERE adm_no = '${row.adm_no}'`;
-              await db.promise().query(updateQuery);
-            } else {
-              const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (${Object.keys(row)}) VALUES (${Object.values(row)})`;
-              await db.promise().query(insertQuery2);
-            }
       } else {
-        if (studentMarksExists2) {
-          // Update data in the total marks table
-          const updateQuery = `UPDATE ${class_name}_${section_name}_total SET ${subject_name} = ${row.total_marks_term_1}, t2_${subject_name} = ${row.total_marks_term_2} WHERE adm_no = '${row.adm_no}'`;
-          await db.promise().query(updateQuery);
+        let count = 0;
+        if (
+          class_name == "kg" ||
+          class_name == "prenursery" ||
+          class_name == "nursery"
+        ) {
+          count += 1;
+          console.log(count, "check");
         } else {
-          // Insert data into the total marks table
-          const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (adm_no, t1_${subject_name}, t2_${subject_name} ) VALUES ('${row.adm_no}', ${row.total_marks_term_1}, ${row.total_marks_term_2})`;
-          await db.promise().query(insertQuery2);
+          if (studentMarksExists2) {
+            // Update data in the total marks table
+            const updateQuery = `UPDATE ${class_name}_${section_name}_total SET t1_${subject_name} = ${row.total_marks_term_1}, t2_${subject_name} = ${row.total_marks_term_2} WHERE adm_no = '${row.adm_no}'`;
+            await db.promise().query(updateQuery);
+          } else {
+            // Insert data into the total marks table
+            const insertQuery2 = `INSERT INTO ${class_name}_${section_name}_total (adm_no, t1_${subject_name}, t2_${subject_name} ) VALUES ('${row.adm_no}', ${row.total_marks_term_1}, ${row.total_marks_term_2})`;
+            await db.promise().query(insertQuery2);
+          }
         }
       }
     }
@@ -413,6 +424,7 @@ router.post("/upload/marks", uploadcsv.single("file"), async (req, res) => {
     res.status(500).json({ error: "Error uploading marks" });
   }
 });
+
 router.post(
   "/upload/nursery-marks",
   uploadcsv.single("file"),
@@ -485,9 +497,6 @@ router.post(
     }
   }
 );
-
-
-
 
 const extractCsvData = async (filePath) => {
   const results = [];
@@ -827,7 +836,6 @@ router.post("/subject-sensecondary-info", async (req, res) => {
 
     const totalTableName = `${class_name}_${section}_total`;
     const subjectTableName = `${class_name}_${section}_${subject}_${subject_code}`;
-    
 
     //   // Check if subject table exists, if not, create it
     const subjectTableExistsQuery = `SHOW TABLES LIKE '${subjectTableName}'`;

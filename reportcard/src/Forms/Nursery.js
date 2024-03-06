@@ -148,7 +148,7 @@ const Nursery = () => {
     onSubmit: async (values, { resetForm }) => {
       try {
         const response = await axios.post(
-          `${URL}/student/nursery`,
+          `${URL}/admin/upload/marks`,
           values
         );
 
@@ -170,9 +170,11 @@ const Nursery = () => {
       formData.append("file", csvFile);
       formData.append("class_name", selectedClass);
       formData.append("section_name", selectedSection);
+      formData.append("subject_name", selectedSubject);
+
       // Append other form data as needed
       const response = await axios.post(
-        `${URL}/admin/upload/nursery-marks`,
+        `${URL}/admin/upload/marks`,
         formData,
         {
           headers: {
