@@ -38,7 +38,7 @@ const BioData = () => {
     adm_no: "",
     student_name: "",
     date_of_birth: "",
-    gurdian_name: "",
+    father_name: "",
     mother_name: "",
     phone: "",
     gender: "",
@@ -73,7 +73,7 @@ const BioData = () => {
     adm_no: Yup.string().required("BioData number is required"),
     student_name: Yup.string().required("Student name is required"),
     date_of_birth: Yup.date().required("Date of birth is required"),
-    gurdian_name: Yup.string().required("Guardian name is required"),
+    father_name: Yup.string().required("Guardian name is required"),
     mother_name: Yup.string().required("Mother name is required"),
     phone: Yup.string(),
     gender: Yup.string().required("Gender is required"),
@@ -366,28 +366,28 @@ const BioData = () => {
                     <div className="relative w-full mb-3">
                       <label
                         className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                        htmlFor="gurdian_name"
+                        htmlFor="father_name"
                       >
                         father name / guardian name
                       </label>
                       <input
                         type="text"
-                        id="gurdian_name"
-                        value={formik.values.gurdian_name}
+                        id="father_name"
+                        value={formik.values.father_name}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         className={`border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${
-                          formik.touched.gurdian_name &&
-                          formik.errors.gurdian_name
+                          formik.touched.father_name &&
+                          formik.errors.father_name
                             ? "border-red-500"
                             : ""
                         }`}
                       />
                     </div>
-                    {formik.touched.gurdian_name &&
-                      formik.errors.gurdian_name && (
+                    {formik.touched.father_name &&
+                      formik.errors.father_name && (
                         <p className="text-red-500 text-xs mt-1">
-                          {formik.errors.gurdian_name}
+                          {formik.errors.father_name}
                         </p>
                       )}
                   </div>

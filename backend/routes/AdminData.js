@@ -568,6 +568,78 @@ router.post(
     }
   }
 );
+router.post(
+  "/upload/scolastic-marks",
+  uploadcsv.single("file"),
+  async (req, res) => {
+    const { path: filePath } = req.file;
+    const { class_name, section_name } = req.body;
+    const tablename = `${class_name}_${section_name}_total`;
+
+    try {
+      const csvData = await extractCsvData(filePath);
+      console.log(csvData);
+      // Sanitize column names
+      const sanitizedColumnNames = Object.keys(csvData[0]).map((column) => {
+        // Remove non-alphanumeric characters and hyphens, replace with underscores
+        return column.replace(/[^a-zA-Z0-9]/g, "_");
+      });
+
+      // Create table if not exists
+      let createTableQuery = `CREATE TABLE IF NOT EXISTS ${tablename} (`;
+      createTableQuery += "adm_no VARCHAR(255) UNIQUE, "; // Ensure adm_no is unique
+      createTableQuery += sanitizedColumnNames
+        .map((column) => `${column} VARCHAR(255)`)
+        .join(", ");
+      createTableQuery += ")";
+      await db.promise().query(createTableQuery);
+
+      // Check if students already exist
+      for (const row of csvData) {
+        // Check if student exists in the total table
+        const studentExistsQuery = `SELECT COUNT(*) AS count FROM ${tablename} WHERE adm_no = ?`;
+        const [studentExistsResult] = await db.promise().query(studentExistsQuery, [row.adm_no]);
+        const studentExists = studentExistsResult[0].count > 0;
+    
+        if (studentExists) {
+            // Update data in the total table
+            let updateQuery = `UPDATE ${tablename} SET `;
+            for (const column in row) {
+                if (column !== "adm_no") {
+                    updateQuery += `${column} = '${row[column]}', `;
+                }
+            }
+            // Remove trailing comma and space
+            updateQuery = updateQuery.slice(0, -2);
+            updateQuery += ` WHERE adm_no = '${row.adm_no}'`;
+    
+            await db.promise().query(updateQuery);
+        } else {
+            // Insert data into the total table
+            let columns = "adm_no";
+            let values = `'${row.adm_no}'`;
+            for (const column in row) {
+                if (column !== "adm_no") {
+                    columns += `, ${column}`;
+                    values += `, '${row[column]}'`;
+                }
+            }
+            const insertQuery = `INSERT INTO ${tablename} (${columns}) VALUES (${values})`;
+            await db.promise().query(insertQuery);
+        }
+    }
+    
+
+      res.status(200).json({
+        message: "Data saved successfully",
+        csvData,
+      });
+    } catch (error) {
+      console.error("Error uploading marks:", error);
+      res.status(500).json({ error: "Error uploading marks" });
+    }
+  }
+);
 
 router.post("/subject-info", async (req, res) => {
   try {

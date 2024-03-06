@@ -9,7 +9,7 @@ import { URL } from "../URL";
 const SubjectMarks = () => {
   const [subjectCode, setSubjectCode] = useState();
   const [checked, setChecked] = useState(false);
-
+  const [scholasticCsv, setScholasticCsv] = useState(null);
   const handleCheckboxChange = () => {
     setChecked(!checked);
   };
@@ -31,12 +31,12 @@ const SubjectMarks = () => {
       formData.append("file", csvFile);
       formData.append("class_name", selectedClass);
       formData.append("section_name", selectedSection);
-      if(selectedClassNumber >10){
-      formData.append("subject_code", subjectCode);
+      if (selectedClassNumber > 10) {
+        formData.append("subject_code", subjectCode);
       }
-      if(checked){
-        formData.append("subject_name", 'vocational_'+selectedSubject);
-      }else{
+      if (checked) {
+        formData.append("subject_name", "vocational_" + selectedSubject);
+      } else {
         formData.append("subject_name", selectedSubject);
       }
 
@@ -59,8 +59,42 @@ const SubjectMarks = () => {
     }
   };
 
+  const handleScholasticFile = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("file", scholasticCsv);
+      formData.append("class_name", selectedClass);
+      formData.append("section_name", selectedSection);
+
+      // Append other form data as needed
+      const response = await axios.post(
+        `${URL}/admin/upload/scolastic-marks`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setMessage(response.data.message);
+      setCsvFile(null); // Reset file state
+      setTimeout(() => {
+        setMessage("");
+      }, 5000);
+    } catch (error) {
+      setError(error.response.data.error);
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+    }
+  };
+
   const handleFileChange = (e) => {
     setCsvFile(e.target.files[0]);
+  };
+
+  const handleFileScholastic = (e) => {
+    setScholasticCsv(e.target.files[0]);
   };
 
   return (
@@ -73,9 +107,41 @@ const SubjectMarks = () => {
             <div className="relative flex flex-col min-w-0 break-words w-full mb-6 rounded-lg bg-blueGray-100 border-0">
               <div className="rounded-t bg-white mb-0 px-6 py-6">
                 <div className="flex justify-between items-center ">
-                  <h6 className="text-blueGray-700 text-xl font-bold lg:w-3/12">
-                    Subject Marks
-                  </h6>
+                  <div className="grid grid-cols-3 gap-2 items-center mb-3 w-1/4  mx-2">
+                    <label
+                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2 col-span-3"
+                      htmlFor="imagename"
+                    >
+                      Upload scholastic csv*
+                    </label>
+                    <div className="flex flex-col col-span-3">
+                      <input
+                        type="file"
+                        id="imagename"
+                        onChange={handleFileScholastic}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="imagename"
+                        className="border-2 border-dashed text-xs border-gray-500 cursor-pointer py-2 px-4 w-full text-center rounded-lg hover:bg-white"
+                      >
+                        {scholasticCsv
+                          ? scholasticCsv.name.slice(0, 23)
+                          : "Choose a csv"}
+                      </label>
+                    </div>
+                    <button
+                      onClick={handleScholasticFile}
+                      disabled={!scholasticCsv}
+                      className={`text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 ${
+                        !csvFile
+                          ? "bg-gray-300 "
+                          : "hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200"
+                      } focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 col-span-3`}
+                    >
+                      Upload
+                    </button>
+                  </div>
 
                   {selectedClassNumber == 9 || selectedClassNumber == 10 ? (
                     <div>
@@ -113,36 +179,35 @@ const SubjectMarks = () => {
                       <hr className="mt-6 border-b-1 border-blueGray-300 pb-6" />
                     </>
                   ) : null}
-                  <div className="grid grid-cols-3  gap-2 items-center mb-3 w-1/2">
+                   <div className="grid grid-cols-3 gap-2 items-center mb-3 w-1/4  mx-2">
                     <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                      className="block  uppercase text-blueGray-600 text-xs font-bold mb-2 col-span-3"
                       htmlFor="imagename"
                     >
-                      Upload csv*
+                      Upload scholastic csv*
                     </label>
-                    <input
-                      type="file"
-                      id="imagename"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="imagename"
-                      className="border-2 border-dashed border-gray-500 cursor-pointer py-2 px-4 w-full text-center rounded-lg hover:bg-white"
-                    >
-                      {csvFile ? csvFile.name.slice(0, 23) : "Choose an csv"}
-                    </label>
+                    <div className="flex flex-col col-span-3">
+                      <input
+                        type="file"
+                        id="imagename"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="imagename"
+                        className="border-2 border-dashed text-xs border-gray-500 cursor-pointer py-2 px-3 w-full text-center rounded-lg hover:bg-white"
+                      >
+                       {csvFile ? csvFile.name.slice(0, 23) : "Choose a csv"}
+                      </label>
+                    </div>
                     <button
                       onClick={handleFile}
                       disabled={!csvFile}
-                      className={`text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 
-              ${
-                !csvFile
-                  ? "bg-gray-300 "
-                  : "hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200"
-              }
-              focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 
-              font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2`}
+                      className={`text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 ${
+                        !csvFile
+                          ? "bg-gray-300 "
+                          : "hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200"
+                      } focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 col-span-3`}
                     >
                       Upload
                     </button>
