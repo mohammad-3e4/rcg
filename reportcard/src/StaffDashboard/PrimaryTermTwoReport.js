@@ -105,7 +105,7 @@ const newData = data.map(obj => {
                           Class & Section:
                         </span>
                         <span>
-                          {selectedNumber}
+                          {selectedClass}
                         </span>
                       </li>
                       <li className="flex items-center mb-2">
