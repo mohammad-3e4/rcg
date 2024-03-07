@@ -16,6 +16,7 @@ const StudentMarksPrimary = ({ marks, fetchStudentMarks, updateStudentMarks }) =
   const selectedClass = selectedVal[0];
   const selectedSection = selectedVal[1];
   const selectedSubject = selectedVal[2];
+  const selectedNumber = selectedVal[3];
 
   useEffect(() => {
     fetchStudentMarks(selectedClass, selectedSubject, selectedSection);

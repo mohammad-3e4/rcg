@@ -5,6 +5,7 @@ const ReportCard = ({
   selectedStudent,
   reportCardData,
   closeReportCardModal,
+  selectedNumber
 }) => {
   const handlePrint = () => {
     var printContents = document.getElementById("printable-content").innerHTML;
@@ -134,7 +135,7 @@ const ReportCard = ({
                           Class & Section:
                         </span>
                         <span>
-                        {reportCardData[0].subject.split("_")[0]}-
+                        {selectedNumber}-
                         {reportCardData[0].subject.split("_")[1].toUpperCase()}
                         </span>
                       </li>
@@ -171,7 +172,7 @@ const ReportCard = ({
                       </li>
                       <li className="flex items-center mb-2">
                         <span className="w-32 font-semibold">Session:</span>
-                        <span>2024-2025</span>
+                        <span>2023-2024</span>
                       </li>
                     </ul>
                   </div>

@@ -6,6 +6,7 @@ const ReportCardThree = ({
   selectedStudent,
   reportCardData,
   closeReportCardModal,
+  selectedNumber
 }) => {
 
   const handlePrint = () => {
@@ -124,7 +125,7 @@ const ReportCardThree = ({
                           Class & Section:
                         </span>
                         <span>
-                        {reportCardData[0].subject.split("_")[0]}-
+                        {selectedNumber}-
                         {reportCardData[0].subject.split("_")[1].toUpperCase()}
                         </span>
                       </li>
@@ -161,7 +162,7 @@ const ReportCardThree = ({
                       </li>
                       <li className="flex items-center mb-2">
                         <span className="w-32 font-semibold">Session:</span>
-                        <span>2024-2025</span>
+                        <span>2023-2024</span>
                       </li>
                     </ul>
                   </div>

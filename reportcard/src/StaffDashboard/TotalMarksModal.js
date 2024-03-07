@@ -10,6 +10,7 @@ const TotalMarksModal = ({
   selectedStudent,
   selectedClass,
   selectedSection,
+  selectedNumber,
   adm_no,
   onClose,
 }) => {
@@ -28,6 +29,9 @@ const TotalMarksModal = ({
           "t1_scholastic_deciplin",
           "t1_scholastic_remark",
           "t1_scholastic_entery",
+          "t1_total",
+          "t1_percentage",
+          "t1_grade",
         ].includes(key)
     )
     .map((key) => key.slice(3));
@@ -42,6 +46,9 @@ const TotalMarksModal = ({
         "t1_scholastic_deciplin",
         "t1_scholastic_remark",
         "t1_scholastic_entery",
+        "t1_total",
+        "t1_percentage",
+        "t1_grade",
       ].includes(key)
   );
 
@@ -55,6 +62,9 @@ const TotalMarksModal = ({
         "t2_scholastic_deciplin",
         "t2_scholastic_remark",
         "t2_scholastic_entery",
+        "t2_total",
+        "t2_percentage",
+        "t2_grade",
       ].includes(key)
   );
 
@@ -228,6 +238,7 @@ const TotalMarksModal = ({
             data={data}
             selectedStudent={selectedStudent}
             termonereportCardData={termonereportCardData}
+            selectedNumber={selectedNumber}
             closeReportCardModal={closeReportCardModal}
           />
         </>
@@ -239,6 +250,7 @@ const TotalMarksModal = ({
             data={data}
             selectedStudent={selectedStudent}
             reportCardData={reportCardData}
+            selectedNumber={selectedNumber}
             closeReportCardModal={closeReportCardModal}
           />
         </>

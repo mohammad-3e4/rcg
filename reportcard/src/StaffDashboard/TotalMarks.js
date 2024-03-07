@@ -29,6 +29,7 @@ const TotalMarks = ({ studentData, fetchStudentData }) => {
   );
   const selectedClass = selectedVal[0];
   const selectedSection = selectedVal[1];
+  const selectedNumber = selectedVal[3];
 
   useEffect(() => {
     fetchStudentData(selectedClass, selectedSection);
@@ -198,6 +199,7 @@ const TotalMarks = ({ studentData, fetchStudentData }) => {
           data={primaryData}
           selectedStudent={selectedStudent}
           selectedClass={selectedClass}
+          selectedNumber={selectedNumber}
           onClose={closeModal}
         />
       ) : (
@@ -210,6 +212,7 @@ const TotalMarks = ({ studentData, fetchStudentData }) => {
           data={primaryDataTermone}
           selectedStudent={selectedStudent}
           selectedClass={selectedClass}
+          selectedNumber={selectedNumber}
           onClose={closeModal}
         />
       ) : (
@@ -224,6 +227,7 @@ const TotalMarks = ({ studentData, fetchStudentData }) => {
             selectedStudent={selectedStudent}
             selectedClass={selectedClass}
             selectedSection={selectedSection}
+            selectedNumber={selectedNumber}
             onClose={closeModal}
           />
         ) : (
@@ -236,6 +240,7 @@ const TotalMarks = ({ studentData, fetchStudentData }) => {
             selectedStudent={selectedStudent}
             selectedClass={selectedClass}
             selectedSection={selectedSection}
+            selectedNumber={selectedNumber}
             onClose={closeModal}
           />
         ) : (
@@ -247,6 +252,7 @@ const TotalMarks = ({ studentData, fetchStudentData }) => {
           selectedStudent={selectedStudent}
           selectedClass={selectedClass}
           selectedSection={selectedSection}
+          selectedNumber={selectedNumber}
           onClose={closeModal}
         />
       ) : (

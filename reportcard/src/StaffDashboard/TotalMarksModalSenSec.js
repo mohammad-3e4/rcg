@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ReportCardThree from "./ReportCardThree";
-import {URL} from '../URL'
+import { URL } from "../URL";
 import axios from "axios";
 
 const TotalMarksModalSenSec = ({
@@ -8,6 +8,7 @@ const TotalMarksModalSenSec = ({
   selectedStudent,
   selectedClass,
   selectedSection,
+  selectedNumber,
   adm_no,
   onClose,
 }) => {
@@ -28,7 +29,9 @@ const TotalMarksModalSenSec = ({
           "t1_scholastic_art",
           "t1_scholastic_health",
           "t1_scholastic_workeducation",
-          
+          "t1_total_marks",
+ 
+          "t1_grade",
         ].includes(key)
     )
     .map((key) => key.slice(3));
@@ -46,21 +49,22 @@ const TotalMarksModalSenSec = ({
         "t1_scholastic_art",
         "t1_scholastic_health",
         "t1_scholastic_workeducation",
+        "t1_total_marks",
+ 
+        "t1_grade",
       ].includes(key)
   );
 
-
-
   const tab2Columns = [
-"t1_scholastic_art",
-"t1_scholastic_computer",
-"t1_scholastic_deciplin",
-"t1_scholastic_drawing",
-"t1_scholastic_entry",
-"t1_scholastic_gk",
-"t1_scholastic_health",
-"t1_scholastic_remark",
-"t1_scholastic_workeducation",
+    "t1_scholastic_art",
+    "t1_scholastic_computer",
+    "t1_scholastic_deciplin",
+    "t1_scholastic_drawing",
+    "t1_scholastic_entry",
+    "t1_scholastic_gk",
+    "t1_scholastic_health",
+    "t1_scholastic_remark",
+    "t1_scholastic_workeducation",
   ];
   const tab2heading = [
     "scholastic art",
@@ -74,10 +78,9 @@ const TotalMarksModalSenSec = ({
     "scholastic workeducation",
   ];
 
-
   const handleReportCardClick = async (adm_no) => {
     try {
-        const Section=selectedSection.toLowerCase()
+      const Section = selectedSection.toLowerCase();
       const apiUrl = `${URL}/student/reportcardthree/${selectedClass}/${Section}/${selectedStudent.adm_no}`;
       const response = await axios.get(apiUrl);
       setReportCardData(response.data);
@@ -159,24 +162,22 @@ const TotalMarksModalSenSec = ({
                 onClick={() => setActiveTab(2)}
               >
                 scholastic
-              </button>             
+              </button>
             </div>
             {activeTab === 1 && renderTable(data, tab1, tabheading)}
             {activeTab === 2 && renderTable(data, tab2Columns, tab2heading)}
-            
           </div>
         </div>
       </div>
       {reportCardData && (
         <>
-     
-                  <ReportCardThree
-                    data={data}
-                    selectedStudent={selectedStudent}
-                    reportCardData={reportCardData}
-                    closeReportCardModal={closeReportCardModal}
-                  />
-              
+          <ReportCardThree
+            data={data}
+            selectedStudent={selectedStudent}
+            reportCardData={reportCardData}
+            selectedNumber={selectedNumber}
+            closeReportCardModal={closeReportCardModal}
+          />
         </>
       )}
     </>

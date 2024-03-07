@@ -6,7 +6,7 @@ const ReportCardTwo = ({
   selectedStudent,
   reportCardData,
   closeReportCardModal,
- 
+  selectedNumber
 }) => {
 
   const handlePrint = () => {
@@ -118,7 +118,7 @@ const ReportCardTwo = ({
                           Class & Section:
                         </span>
                         <span>
-                          {reportCardData[0].subject.split("_")[0]}-
+                          {selectedNumber}-
                           {reportCardData[0].subject
                             .split("_")[1]
                             .toUpperCase()}

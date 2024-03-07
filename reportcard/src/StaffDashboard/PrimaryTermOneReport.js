@@ -5,6 +5,7 @@ const PrimaryTermOneReport = ({
   selectedStudent,
   selectedClass,
   onClose,
+  selectedNumber
 }) => {
   const handlePrint = () => {
     var printContents = document.getElementById("printable-content").innerHTML;
@@ -12,6 +13,7 @@ const PrimaryTermOneReport = ({
     window.print();
     window.document.close();
   };
+  
   const dateone = Date.now();
   const currentDate = new Date(dateone);
   const day = currentDate.getDate();
@@ -103,7 +105,7 @@ const newData = data.map(obj => {
                           Class & Section:
                         </span>
                         <span>
-                          {selectedClass}
+                          {selectedNumber}
                         </span>
                       </li>
                       <li className="flex items-center mb-2">
@@ -139,7 +141,7 @@ const newData = data.map(obj => {
                       </li>
                       <li className="flex items-center mb-2">
                         <span className="w-32 font-semibold">Session:</span>
-                        <span>2024-2025</span>
+                        <span>2023-2024</span>
                       </li>
                     </ul>
                   </div>

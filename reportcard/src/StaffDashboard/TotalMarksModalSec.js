@@ -9,7 +9,7 @@ const TotalMarksModalSec = ({
   selectedStudent,
   selectedClass,
   selectedSection,
-
+  selectedNumber,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState(1);
@@ -29,6 +29,9 @@ const TotalMarksModalSec = ({
           "t1_scholastic_art",
           "t1_scholastic_health",
           "t1_scholastic_workeducation",
+          "t1_total_marks",
+
+          "t1_grade",
         ].includes(key)
     )
     .map((key) => key.slice(3));
@@ -46,6 +49,9 @@ const TotalMarksModalSec = ({
         "t1_scholastic_art",
         "t1_scholastic_health",
         "t1_scholastic_workeducation",
+        "t1_total_marks",
+
+        "t1_grade",
       ].includes(key)
   );
 
@@ -128,7 +134,6 @@ const TotalMarksModalSec = ({
     );
   };
 
-
   return (
     <>
       <div className="modal-overlay">
@@ -173,6 +178,7 @@ const TotalMarksModalSec = ({
             data={data}
             selectedStudent={selectedStudent}
             reportCardData={reportCardData}
+            selectedNumber={selectedNumber}
             closeReportCardModal={closeReportCardModal}
           />
         </>

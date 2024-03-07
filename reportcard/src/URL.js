@@ -1,1 +1,1 @@
-export const URL = `https://api.gnkschool.tech`
+export const URL = `http://localhost:3001`

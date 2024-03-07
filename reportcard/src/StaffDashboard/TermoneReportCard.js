@@ -5,6 +5,7 @@ const TermoneReportCard = ({
   selectedStudent,
   termonereportCardData,
   closeReportCardModal,
+  selectedNumber
 }) => {
   const handlePrint = () => {
     var printContents = document.getElementById("printable-content").innerHTML;
@@ -114,7 +115,7 @@ const TermoneReportCard = ({
                           Class & Section:
                         </span>
                         <span>
-                          {termonereportCardData[0].subject.split("_")[0]}-
+                          {selectedNumber}-
                           {termonereportCardData[0].subject
                             .split("_")[1]
                             .toUpperCase()}
@@ -153,7 +154,7 @@ const TermoneReportCard = ({
                       </li>
                       <li className="flex items-center mb-2">
                         <span className="w-32 font-semibold">Session:</span>
-                        <span>2024-2025</span>
+                        <span>2023-2024</span>
                       </li>
                     </ul>
                   </div>
